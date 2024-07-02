@@ -1,0 +1,11 @@
+# Object files
+*.o
+
+# Executables
+*.exe
+
+# Program output
+MyTools.txt
+
+# No extension
+chipload
