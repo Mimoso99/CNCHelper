@@ -30,7 +30,7 @@
 
 
 int main(void)
- {
+{
     /**
      * Declares and/or inicializes variables for reading user input from a specified .txt file.
      * Variables include flags for beginner status, material, tool unit, tool teeth, job quality, output units,
@@ -48,7 +48,7 @@ int main(void)
     char *tool = NULL;                                      // empty string (char pointer to NULL) for user input on tool
     char *tool_teeth = NULL;                                // empty string (char pointer to NULL) for user input on tool number of cutting edges
     char *job_quality = NULL;                               // empty string (char pointer to NULL) for user input on job quality (finish vs speed)
-    char *out_unit = NULL;                                 // empty string (char pointer to NULL) for user input on what units should be displayed (mm/s? mm/m? inch/s? etc)
+    char *out_unit = NULL;                                  // empty string (char pointer to NULL) for user input on what units should be displayed (mm/s? mm/m? inch/s? etc)
     char *unique_materials[N_BUCKETS] = {NULL};             // empty array of strings (array of char pointers to NULL) to store the names of every unique materials loaded into memory
     // Variables for holding .csv values
     float chipload;                                         // float variable for chipload value
@@ -57,7 +57,7 @@ int main(void)
     char *lenght_units[] = {"mm", "in", "inch", "inches"};  // string arrays with supported units for distance and speed (used for convertions and for input string matching)
     char *speed_units[] = {"mm/s", "mm/m", "m/m", "inch/s", "inch/m", "in/s", "in/m", "feet/m"};
 
-    
+
     /**
      * Loads material and chipload information from a .csv file into a Hash table.
      * If successful, prints "Successfully loaded materials"; otherwise, prints an error message and returns with 1.
@@ -91,7 +91,7 @@ int main(void)
         printf("%s\n", unique_materials[i]);
     }
     printf("\n");
-    
+
 
     /**
      * Reads user input data from a specified .txt file and assigns values to corresponding variables.
@@ -194,7 +194,7 @@ int main(void)
     printf("The diameter is %i %s (rounded from %f)\n", rounded_diameter, best_tool_unit, diameter);
     printf("\n");
 
-    
+
     /**
      * Check for the best match of a material from a list of unique materials.
      * If the material match is invalid, print an error message, log the error, and return the error code 12.
