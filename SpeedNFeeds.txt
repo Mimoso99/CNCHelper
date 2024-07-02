@@ -1,0 +1,29 @@
+=================================
+Get your starting CNC values here
+=================================
+
+I'm a begginer: Yes
+(Options: Yes or No. ? This setting lowers the workload significantly)
+
+Material to cut: softwood
+(Enter the material you want to cut, e.g., Wood, Metal, Plastic)
+
+Tool Diameter: 1/4 inehs
+(Enter the dimeter of the tool you will use, e.g., 3mm, 1/4inch)
+  
+Tool Flutes: 2
+(Enter the number of flutes/cutting edges. Typically 1 or 2)
+
+Job Quality: 3
+(Options: Finish min 1 - 2 - 3 (Balanced) - 4 - 5 max Speed)
+
+I want to get the FeedRate in: inch/s
+(Ex: mm/s, mmm, in/m, etc)
+
+Print a generic CNC CHECKLIST for the job: Yes
+(Options: Yes or No ? Useful if you aren't used to a generic CNC workflow)
+
+Print a LIST of supported materials: Yes
+(Options: Yes or No. ? You can always open the ChiploadTable.csv to check what materials are in there)
+
+=================================

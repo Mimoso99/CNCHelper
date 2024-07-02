@@ -1,0 +1,42 @@
+Material, Tool(diam_metric), Chipload(metric), Rpmfactor(optional)
+MDF, 2, 0.05, 1
+MDF, 3, 0.08, 1
+MDF, 4, 0.10, 1
+MDF, 6, 0.12, 1
+MDF, 8, 0.14, 1
+Soft Wood, 2, 0.04, 1
+Soft Wood, 3, 0.07, 1
+Soft Wood, 4, 0.085, 1
+Soft Wood, 6, 0.10, 1
+Soft Wood, 8, 0.12, 1
+Hard Wood, 2, 0.03, 1
+Hard Wood, 3, 0.05, 1
+Hard Wood, 4, 0.065, 1
+Hard Wood, 6, 0.08, 1
+Hard Wood, 8, 0.11, 1
+Soft Plastic, 2, 0.04, 1
+Soft Plastic, 3, 0.10, 1
+Soft Plastic, 4, 0.11, 1
+Soft Plastic, 6, 0.12, 1
+Soft Plastic, 8, 0.14, 1
+Hard Plastic, 2, 0.03, 1
+Hard Plastic, 3, 0.08, 1
+Hard Plastic, 4, 0.09, 1
+Hard Plastic, 6, 0.10, 1
+Hard Plastic, 8, 0.12, 1
+Aluminium, 2, 0.01, 1
+Aluminium, 3, 0.02, 1
+Aluminium, 4, 0.03, 1
+Aluminium, 6, 0.04, 1
+Aluminium, 8, 0.06, 1
+Steel, 2, 0.005, 1
+Steel, 3, 0.01, 1
+Steel, 4, 0.015, 1
+Steel, 6, 0.02, 1
+Steel, 8, 0.03, 1
+Plywood, 2, 0.05, 1
+Plywood, 3, 0.08, 1
+Plywood, 4, 0.10, 1
+Plywood, 6, 0.12, 1
+Plywood, 8, 0.14, 1
+
