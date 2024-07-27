@@ -5,7 +5,8 @@
  */
 
 // Include headers & libraries (<stdbool.h> is included in the header "chipload.h")
-#include <stdio.h>      // for standard input/output operations
+#include <iostream>     // for standard C++ library for input and output
+#include <cstdio>       // for standard input/output operations
 #include "chipload.h"   // for external user defined functions
 
 

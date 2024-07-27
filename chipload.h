@@ -3,7 +3,8 @@
 #define CHIPLOAD_H
 
 // Header files
-#include <stdbool.h>
+#include <iostream>     // for standard C++ library for input and output
+#include <cstdbool>     // for bools
 
 // Constant Expressions for CNC LIMITS
 #define CNCPOWER 3000       // CNC max power in watts

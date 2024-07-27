@@ -5,10 +5,11 @@
  */
 
 // Include headers & libraries (<stdbool.h> is included in the header "chipload.h")
-#include <ctype.h>      // for character handling functions
-#include <stdio.h>      // for standard input/output operations
-#include <stdlib.h>     // for memory allocation
-#include <string.h>     // for string manipulation functions
+#include <iostream>     // for standard C++ library for input and output
+#include <cctype>       // for character handling functions
+#include <cstdio>       // for standard input/output operations
+#include <cstdlib>      // for memory allocation
+#include <cstring>      // for string manipulation functions
 #include "chipload.h"   // for external user defined functions
 
 

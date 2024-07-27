@@ -6,9 +6,10 @@
  */
 
 // Include headers & libraries (<stdbool.h> is included in the header "chipload.h")
-#include <float.h>      // for constants related to floating point values
-#include <stdio.h>      // for standard input/output operations
-#include <stdlib.h>     // for memory allocation
+#include <iostream>     // for standard C++ library for input and output
+#include <cfloat>       // for constants related to floating point values
+#include <cstdio>       // for standard input/output operations
+#include <cstdlib>      // for memory allocation
 #include "chipload.h"   // for external user defined functions
 
 
