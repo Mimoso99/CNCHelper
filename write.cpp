@@ -1,16 +1,18 @@
 /**
- * This file contains the following function definitions for writting results and messages to user output:
+ * This file contains the following function definitions for writing results and messages to user output:
  * - ErrorMessage
+ * - WarningMessage
  * - WriteResultsToFile
  */
 
-// Include headers & libraries (<stdbool.h> is included in the header "chipload.h")
+// Include headers & libraries
 #include <iostream>     // for standard C++ library for input and output
 #include <cstdio>       // for standard input/output operations
+#include <string>       // for std::string
 #include "chipload.h"   // for external user defined functions
 
 
-// Initialize error counter (extern if main want's to print number of errors and or warnings)
+// Initialize error counter (extern if main wants to print number of errors and or warnings)
 unsigned int number_errors = 0;
 unsigned int number_warnings = 0;
 
@@ -25,10 +27,10 @@ unsigned int number_warnings = 0;
  * Returns:
  * @return This function does not return a value.
  */
-void ErrorMessage(const char *filename, int error) {
-    FILE *file = fopen(filename, "a");  // open file in append mode
-    if (file == NULL) {                 // handles case where file can't be accessed
-        printf("Error opening file %s\n", filename); 
+void ErrorMessage(const std::string &filename, int error) {
+    FILE *file = fopen(filename.c_str(), "a");  // open file in append mode
+    if (file == nullptr) {                      // handles case where file can't be accessed
+        std::cerr << "Error opening file " << filename << std::endl; 
         return;
     }
 
@@ -87,7 +89,7 @@ void ErrorMessage(const char *filename, int error) {
 
 
 /**
- * WarningMessage: writes a warning message to a file based on the error code provided.
+ * WarningMessage: writes a warning message to a file based on the warning code provided.
  * 
  * Parameters:
  * @param filename: The name of the file to write the warning message to.
@@ -96,19 +98,19 @@ void ErrorMessage(const char *filename, int error) {
  * Returns:
  * @return This function does not return a value.
  */
-void WarningMessage(const char *filename, int warning) {
-    FILE *file = fopen(filename, "a");  // open file in append mode
-    if (file == NULL) {                 // handles case where file can't be accessed
-        printf("Error opening file %s\n", filename); 
+void WarningMessage(const std::string &filename, int warning) {
+    FILE *file = fopen(filename.c_str(), "a");  // open file in append mode
+    if (file == nullptr) {                      // handles case where file can't be accessed
+        std::cerr << "Error opening file " << filename << std::endl; 
         return;
     }
 
-    if ((number_warnings = 0))          // print warning header if it's the first error
+    if (number_warnings == 0)                  // print warning header if it's the first warning
         fprintf(file, "============= WARNINGS =============\n");
 
-    ++number_warnings;                  // for counting errors
+    ++number_warnings;                        // for counting warnings
    
-    switch (warning)                    // print error message based on error
+    switch (warning)                          // print warning message based on warning
     {
     case 6:
         fprintf(file, "Warning 6: You didn't specify the units you want the results to be displayed, the feedrate was calculated in mm/m.\n\n");
@@ -131,12 +133,12 @@ void WarningMessage(const char *filename, int warning) {
         break;
     
     case 15:
-        fprintf(file, "Warning 15: BE CAREFUL!!! The feed is to high for the machine. You should get a tool with less cutting edges, smaller diameter or even both.\n");
+        fprintf(file, "Warning 15: BE CAREFUL!!! The feed is too high for the machine. You should get a tool with fewer cutting edges, smaller diameter, or even both.\n");
         fprintf(file, "Still if you know what you are doing you could try to run the machine at its minimum feed for its maximum feedrate of %d mm/m @%d rpm\n\n", CNCMAXFEED, CNCMINSPEED);
         break;
 
     default:
-        fprintf(file, "WARNING DEFAULT: UNKOWN WARNING :(\n\n");
+        fprintf(file, "WARNING DEFAULT: UNKNOWN WARNING :(\n\n");
         break;
     }
 
@@ -146,9 +148,8 @@ void WarningMessage(const char *filename, int warning) {
 
 
 /**
- * WriteResultstoFile: writes the calculation results to a file, including details about the tool, material, speed, and generated results.
+ * WriteResultsToFile: writes the calculation results to a file, including details about the tool, material, speed, and generated results.
  * 
- * Parameters:
  * Parameters:
  * @param filename: The name of the file to write the results to.
  * @param material: The material being cut.
@@ -166,10 +167,10 @@ void WarningMessage(const char *filename, int warning) {
  * Returns:
  * @return true if the results were successfully written to the file, false otherwise.
  */
-bool WriteResultsToFile(const char *filename, const char *material, float tool_diameter, const char*tool_unit, int tool_teeth, float speed, Point results, const float feed_rate, char *out_unit, char *materials_list[], bool checklist, bool supported_materials_list) {
-    FILE *file = fopen(filename, "a");      // open file in append mode
-    if (file == NULL) {                     // handles case where file can't be accessed
-        printf("Error opening file %s\n", filename); 
+bool WriteResultsToFile(const std::string &filename, const std::string &material, float tool_diameter, const std::string &tool_unit, int tool_teeth, float speed, Point results, float feed_rate, const std::string &out_unit, const std::vector<std::string> &materials_list, bool checklist, bool supported_materials_list) {
+    FILE *file = fopen(filename.c_str(), "a");      // open file in append mode
+    if (file == nullptr) {                        // handles case where file can't be accessed
+        std::cerr << "Error opening file " << filename << std::endl; 
         return false;
     }
 
@@ -180,17 +181,17 @@ bool WriteResultsToFile(const char *filename, const char *material, float tool_d
 
     // Write the results to the file
     fprintf(file, "\n\n====================================================================================\n");
-    fprintf(file, "                      NEW TOOL: %.2f %s (%i flutes) for %s\n", tool_diameter, tool_unit, tool_teeth, material);
+    fprintf(file, "                      NEW TOOL: %.2f %s (%i flutes) for %s\n", tool_diameter, tool_unit.c_str(), tool_teeth, material.c_str());
     fprintf(file, "====================================================================================\n\n");
-    fprintf(file, "Parameters optimized for quality/speed value of %1.f:\n", speed);
-    fprintf(file, "Feedrate: %.1f %s\n", feed_rate, out_unit);
+    fprintf(file, "Parameters optimized for quality/speed value of %.1f:\n", speed);
+    fprintf(file, "Feedrate: %.1f %s\n", feed_rate, out_unit.c_str());
     fprintf(file, "RPM:      %i rpm\n\n", results.x);
     fprintf(file, "Remember that this is a good starting point, first you should try testing it in a\n");
-    fprintf(file, "small piece of %s and note how it goes. Adjust it as needed or try to get\n", material);
+    fprintf(file, "small piece of %s and note how it goes. Adjust it as needed or try to get\n", material.c_str());
     fprintf(file, "different values by changing the job speed/finish (or other parameters). When testing\n");
     // TODO: write logic depth of cut in metals and very hard or gummy materials
-    fprintf(file, "start with a relatively low depth of cut of %.2f %s and increment it until a max of\n", depth_of_cut, tool_unit);
-    fprintf(file, "%.2f %s. If dealing with metals like aluminum or steel don't go above %.2f %s.\n\n\n", tool_diameter, tool_unit, depth_of_cut, tool_unit);
+    fprintf(file, "start with a relatively low depth of cut of %.2f %s and increment it until a max of\n", depth_of_cut, tool_unit.c_str());
+    fprintf(file, "%.2f %s. If dealing with metals like aluminum or steel don't go above %.2f %s.\n\n\n", tool_diameter, tool_unit.c_str(), depth_of_cut, tool_unit.c_str());
     // Print checklist if user specifies it
     if (checklist) {
         fprintf(file, "=========\n");
@@ -201,14 +202,14 @@ bool WriteResultsToFile(const char *filename, const char *material, float tool_d
         fprintf(file, "□ Go over the tool paths and check if all the parameters are correct.\n");
         fprintf(file, "□ Does the reference point and stock material in CAD correctly match the machine setup?\n");
         fprintf(file, "□ Is the stock material firmly secured in place?\n");
-        fprintf(file, "□ Is any of the fixing hardware in the way of the toolpath?.\n");
-        fprintf(file, "□ Is the CNC currectly homed?\n");
-        fprintf(file, "□ Is the CNC tool currectly fixed?\n");
-        fprintf(file, "□ Is the CNC tool lenght measured?\n");
-        fprintf(file, "□ Is the CNC zero point currectly setup matching the CAD reference point for the toolpaths?\n");
+        fprintf(file, "□ Is any of the fixing hardware in the way of the toolpath?\n");
+        fprintf(file, "□ Is the CNC correctly homed?\n");
+        fprintf(file, "□ Is the CNC tool correctly fixed?\n");
+        fprintf(file, "□ Is the CNC tool length measured?\n");
+        fprintf(file, "□ Is the CNC zero point correctly setup matching the CAD reference point for the toolpaths?\n");
         fprintf(file, "□ Observe from a safe place, if possible, the machine running, take notes of what you see\n");
         fprintf(file, "□ Observe the machined piece, take notes\n");
-        fprintf(file, "□ If you observed something out of the ordinary or the results where insatisfactory, collect your notes, Search for possible solutions and/or ask for help\n\n\n");
+        fprintf(file, "□ If you observed something out of the ordinary or the results were unsatisfactory, collect your notes, search for possible solutions and/or ask for help\n\n\n");
     }
 
     // Print materials list if user specifies it
@@ -217,8 +218,8 @@ bool WriteResultsToFile(const char *filename, const char *material, float tool_d
         fprintf(file, "%u Materials Supported:\n", unique_materials_count);
         fprintf(file, "===================\n\n");
 
-        for (unsigned int i = 0; i < unique_materials_count; i++) {
-            fprintf(file, "%s\n", materials_list[i]);
+        for (const auto &mat : materials_list) {
+            fprintf(file, "%s\n", mat.c_str());
         }
         
         fprintf(file, "\n");

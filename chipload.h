@@ -4,7 +4,8 @@
 
 // Header files
 #include <iostream>     // for standard C++ library for input and output
-#include <cstdbool>     // for bools
+#include <string>      // for std::string
+#include <vector>      // for std::vector
 
 // Constant Expressions for CNC LIMITS
 #define CNCPOWER 3000       // CNC max power in watts
@@ -20,42 +21,41 @@
 #define N_BUCKETS 26        // Number of buckets in Hash table
 
 // Represents a node in a Hash table
-typedef struct node
-{
-    char material[MAX_WORD_LENGTH + 1];
+struct Node {
+    std::string material;  // Changed from char[] to std::string
     float diameter;
     float chipload;
     float factor;
-    struct node *next;
-} node;
+    Node* next;
+};
 
 // Represents a point with x and y coordinates
-typedef struct {
+struct Point {
     int x;
     int y;
-} Point;
+};
 
 // Declaration of external variables
-extern node *table[N_BUCKETS];
-extern char *unique_materials[N_BUCKETS];
+extern std::vector<Node*> table;          // Changed from array to vector
+extern std::vector<std::string> unique_materials;  // Changed from array to vector
 extern unsigned int unique_materials_count;
 
 
 // Function Prototypes
-bool UniqueElements(char *unique_materials[], unsigned int *material_counter);
-bool ReadFromFile(const char *filename, bool *beginner, char **material, char **tool_diam, char **tool_z, char **job_quality, char **out_units, bool *checklist, bool *supported_materials_list);
-void CleanString(char *source);
-float CleanNumber(const char *source);
-char* BestMatch(char *source, char *dictionary[], int dictionary_size, int max_distance);
-bool Load(const char *filename);
-bool Search(const char *material, float diameter, float *chipload, float *rpm_factor);
-bool Unload(void);
-void PrintTable(void);
+bool UniqueElements(std::vector<std::string>& unique_materials, unsigned int& material_counter);
+bool ReadFromFile(const std::string& filename, bool& beginner, std::string& material, std::string& tool_diam, std::string& tool_z, std::string& job_quality, std::string& out_units, bool& checklist, bool& supported_materials_list);
+void CleanString(std::string& source);
+float CleanNumber(const std::string& source);
+std::string BestMatch(const std::string& source, const std::vector<std::string>& dictionary, int max_distance);
+bool Load(const std::string& filename);
+bool Search(const std::string& material, float diameter, float& chipload, float& rpm_factor);
+bool Unload();
+void PrintTable();
 Point Simplex(int x_min, int x_max, int y_max, float a, float b, bool maximize_y);
 Point Midpoint(int x_min, int x_max, int y_max, float c);
-bool WriteResultsToFile(const char *filename, const char *material, float tool_diameter, const char *tool_unit, int tool_teeth, float speed, Point results, const float feed_rate, char *out_unit, char *materials_list[], bool checklist, bool supported_materials_list);
-float Convert(float value, char* from, char* to);
-void ErrorMessage(const char *filename, int error);
-void WarningMessage(const char *filename, int warning);
+bool WriteResultsToFile(const std::string& filename, const std::string& material, float tool_diameter, const std::string& tool_unit, int tool_teeth, float speed, Point results, float feed_rate, const std::string& out_unit, const std::vector<std::string>& materials_list, bool checklist, bool supported_materials_list);
+float Convert(float value, const std::string& from, const std::string& to);
+void ErrorMessage(const std::string& filename, int error);
+void WarningMessage(const std::string& filename, int warning);
 
 #endif

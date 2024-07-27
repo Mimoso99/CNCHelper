@@ -5,16 +5,15 @@
  * - Midpoint
  */
 
-// Include headers & libraries (<stdbool.h> is included in the header "chipload.h")
-#include <iostream>     // for standard C++ library for input and output
-#include <cfloat>       // for constants related to floating point values
-#include <cstdio>       // for standard input/output operations
-#include <cstdlib>      // for memory allocation
-#include "chipload.h"   // for external user defined functions
-
+// Include headers & libraries
+#include <iostream>   // for standard C++ library input/output
+#include <cfloat>     // for constants related to floating point values
+#include <cmath>      // for mathematical functions
+#include <vector>     // for using std::vector
+#include "chipload.h" // for external user defined functions
 
 /**
- * Function: check if a Point p is feasible within given bounds and constraints.
+ * Function: Check if a Point p is feasible within given bounds and constraints.
  *
  * Parameters:
  * @param p The point to be checked for feasibility.
@@ -25,18 +24,17 @@
  * @param b The slope of the lower bound straight, a constraint of the feasible region
  * 
  * Return:
- * @return 1 if the point is feasible, 0 otherwise (could be a bool, was implemented before knowing about stdbool.h).
+ * @return true if the point is feasible, false otherwise.
  */
-int is_feasible(Point p, int x_min, int x_max, int y_max, float a, float b) {
+bool is_feasible(const Point &p, int x_min, int x_max, int y_max, float a, float b) {
     return (x_min <= p.x && p.x <= x_max &&
             0 <= p.y && p.y <= y_max &&
             p.y >= b * p.x &&
             p.y <= a * p.x);
 }
 
-
 /**
- * Function: implements the Simplex algorithm to find the optimal point based on given constraints.
+ * Function: Implements the Simplex algorithm to find the optimal point based on given constraints.
  * It iterates over possible x or y values within bounds to maximize the objective function value.
  *
  * Parameters:
@@ -52,20 +50,18 @@ int is_feasible(Point p, int x_min, int x_max, int y_max, float a, float b) {
  */
 Point Simplex(int x_min, int x_max, int y_max, float a, float b, bool maximize_y) {
     Point best_point = {0, 0};
-    float best_value = -FLT_MAX; // Initialize best_value to the lowest possible negative float. This ensures the maximization process runs as intended
+    float best_value = -FLT_MAX; // Initialize to the lowest possible negative float to ensure maximization
 
-    // maximizing y is to go for the highest possible feedrate
     if (maximize_y) {
-        // Enumerate over possible x values in 100 increments to find the best y
+        // Maximize y by iterating over possible x values
         for (int x = x_min; x <= x_max; x += 100) {
-            int y_min = (int)(b * x);
-            int y_max_limit = (int)(a * x);
+            int y_min = static_cast<int>(b * x);
+            int y_max_limit = static_cast<int>(a * x);
 
-            // Consider the y values within bounds in 50 increments
-            if (y_min < 0) y_min = 0;
-            if (y_max_limit > y_max) y_max_limit = y_max;
+            // Adjust y_min and y_max_limit to be within bounds
+            y_min = std::max(0, y_min);
+            y_max_limit = std::min(y_max, y_max_limit);
 
-            // Check feasibility and update best point if necessary
             for (int y = y_min; y <= y_max_limit; y += 50) {
                 Point p = {x, y};
                 if (is_feasible(p, x_min, x_max, y_max, a, b) && p.y > best_value) {
@@ -74,18 +70,16 @@ Point Simplex(int x_min, int x_max, int y_max, float a, float b, bool maximize_y
                 }
             }
         }
-    // maximizing x is to go for the highest possible rotational speed
     } else {
-        // Enumerate over possible y values in 50 increments to find the best x
+        // Maximize x by iterating over possible y values
         for (int y = 0; y <= y_max; y += 50) {
-            int x_min_limit = (int)(y / a);
-            int x_max_limit = (int)(y / b);
+            int x_min_limit = static_cast<int>(y / b);
+            int x_max_limit = static_cast<int>(y / a);
 
-            // Consider the x values within bounds in 100 increments
-            if (x_min_limit < x_min) x_min_limit = x_min;
-            if (x_max_limit > x_max) x_max_limit = x_max;
+            // Adjust x_min_limit and x_max_limit to be within bounds
+            x_min_limit = std::max(x_min, x_min_limit);
+            x_max_limit = std::min(x_max, x_max_limit);
 
-            // Check feasibility and update best point if necessary
             for (int x = x_min_limit; x <= x_max_limit; x += 100) {
                 Point p = {x, y};
                 if (is_feasible(p, x_min, x_max, y_max, a, b) && p.x > best_value) {
@@ -99,9 +93,8 @@ Point Simplex(int x_min, int x_max, int y_max, float a, float b, bool maximize_y
     return best_point;
 }
 
-
 /**
- * Function: calculate the Midpoint of a given range based on the provided constraints.
+ * Function: Calculate the midpoint of a given range based on the provided constraints.
  *
  * Parameters:
  * @param x_min The minimum x value allowed.
@@ -110,28 +103,28 @@ Point Simplex(int x_min, int x_max, int y_max, float a, float b, bool maximize_y
  * @param c The slope of the straight-segment for the midpoint
  * 
  * Return:
- * @return The Midpoint point that satisfies the constraints.
+ * @return The midpoint point that satisfies the constraints.
  */
 Point Midpoint(int x_min, int x_max, int y_max, float c) {
     int mid_x = (x_min + x_max) / 2;
-    int y_min_at_mid_x = (int)(c * mid_x);
+    int y_min_at_mid_x = static_cast<int>(c * mid_x);
 
     // Adjust y_min_at_mid_x to be within bounds
-    if (y_min_at_mid_x < MIN_Y) y_min_at_mid_x = MIN_Y;
+    y_min_at_mid_x = std::max(MIN_Y, y_min_at_mid_x);
 
     int y_max_at_mid_x = y_max;
     int mid_y = (y_min_at_mid_x + y_max_at_mid_x) / 2;
 
-    Point Midpoint = {mid_x, mid_y};
+    Point midpoint = {mid_x, mid_y};
 
-    // Check feasibility of the Midpoint
-    if (!is_feasible(Midpoint, x_min, x_max, y_max, c, 0)) {
-        // If the Midpoint is not feasible, adjust to the nearest feasible point
+    // Check feasibility of the midpoint
+    if (!is_feasible(midpoint, x_min, x_max, y_max, c, 0)) {
+        // Adjust to the nearest feasible point if not feasible
         if (mid_y < c * mid_x) {
-            mid_y = (int)(c * mid_x);
+            mid_y = static_cast<int>(c * mid_x);
         }
-        Midpoint.y = mid_y;
+        midpoint.y = mid_y;
     }
 
-    return Midpoint;
+    return midpoint;
 }
