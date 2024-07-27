@@ -1,6 +1,6 @@
 # Compiler and compiler flags
-CC = gcc
-CFLAGS = -Wall -Wextra -std=c11 -g
+CC = g++
+CFLAGS = -Wall -Wextra -std=c++20 -g
 
 # Linker flags, some common ones
 LDFLAGS = -lcs50 -lm
@@ -9,10 +9,10 @@ LDFLAGS = -lcs50 -lm
 TARGET = chipload
 
 # Source files
-SOURCES = main.c read.c helpers.c load.c write.c simplex.c
+SOURCES = main.cpp read.cpp helpers.cpp load.cpp write.cpp simplex.cpp
 
-# Object files (by replacing .c with .o in the source files)
-OBJECTS = $(SOURCES:.c=.o)
+# Object files (by replacing .cpp with .o in the source files)
+OBJECTS = $(SOURCES:.cpp=.o)
 
 # Default target
 all: $(TARGET)
@@ -22,7 +22,7 @@ $(TARGET): $(OBJECTS)
 	$(CC) $(CFLAGS) -o $(TARGET) $(OBJECTS) $(LDFLAGS)
 
 # Rule to compile source files into object files
-%.o: %.c chipload.h
+%.o: %.cpp chipload.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Clean target to remove compiled files
