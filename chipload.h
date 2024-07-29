@@ -36,8 +36,8 @@ struct Point {
 };
 
 // Declaration of external variables
-extern std::vector<Node*> table;          // Changed from array to vector
-extern std::vector<std::string> unique_materials;  // Changed from array to vector
+extern Node* table[N_BUCKETS];          // Changed from array to vector
+extern unsigned int unique_materials;  // Changed from array to vector
 extern unsigned int unique_materials_count;
 
 

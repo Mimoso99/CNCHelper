@@ -7,7 +7,7 @@
 #include "chipload.h"   // for external user defined functions
 
 // external variable
-extern node *table[N_BUCKETS]; // Ensure this is declared somewhere in your code
+extern Node *table[N_BUCKETS]; // Ensure this is declared somewhere in your code
 
 /**
  * Function: initializes unique materials by checking and adding them to the unique_materials array.
@@ -21,12 +21,12 @@ extern node *table[N_BUCKETS]; // Ensure this is declared somewhere in your code
  */
 bool UniqueElements(std::vector<std::string> &unique_materials, unsigned int *material_counter) {
     for (unsigned int i = 0; i < N_BUCKETS; i++) {
-        node *cursor = table[i];
+        Node *cursor = table[i];
         while (cursor != NULL) {
             bool unique = true;
             // check if the material is already in the unique_materials vector
             for (unsigned int j = 0; j < *material_counter; j++) {
-                if (strcasecmp(cursor->material, unique_materials[j].c_str()) == 0) {
+                if (strcasecmp(cursor->material.c_str(), unique_materials[j].c_str()) == 0) {
                     unique = false;
                     break;
                 }

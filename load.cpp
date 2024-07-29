@@ -7,7 +7,7 @@
 #include "chipload.h"   // for external user defined functions
 
 // Hash table
-node* table[N_BUCKETS];
+Node* table[N_BUCKETS];
 
 // Variables for future use
 unsigned int material_count = 0;         // positive integer counter for the number of unique materials loaded into memory
@@ -35,9 +35,9 @@ unsigned int Hash(const std::string &word)
  * @param filename The name of the CSV file to Load data from.
  * @return true if the data is loaded successfully, false otherwise.
  */
-bool Load(const char *filename)
+bool Load(const std::string& filename)
 {
-    FILE *file = fopen(filename, "r");
+    FILE *file = fopen(filename.c_str(), "r");
     if (!file)
     {
         printf("Can't open file\n");
@@ -79,11 +79,11 @@ bool Load(const char *filename)
 
         // Check for uniqueness
         unsigned int index = Hash(material);
-        node *cursor = table[index];
+        Node *cursor = table[index];
         bool unique = true;
         while (cursor != NULL)
         {
-            if (strcasecmp(cursor->material, material.c_str()) == 0 && cursor->diameter == diameter) {
+            if (strcasecmp(cursor->material.c_str(), material.c_str()) == 0 && cursor->diameter == diameter) {
                 unique = false;
                 break;
             }
@@ -95,14 +95,14 @@ bool Load(const char *filename)
         }
 
         // Create a new node for the material
-        node *n = (node *)malloc(sizeof(node));
+        Node *n = (Node *)malloc(sizeof(Node));
         if (!n)
         {
             printf("Failed to allocate memory for a new node (LookupTable chipload data structure)");
             fclose(file);
             return false;
         }
-        strcpy(n->material, material.c_str());
+        n->material = material;
         n->diameter = diameter;
         n->chipload = chipload;
         n->factor = factor;
@@ -124,18 +124,18 @@ bool Load(const char *filename)
  * @param rpm_factor Pointer to store the found RPM factor value.
  * @return true if the material and diameter are found in the Hash table, false otherwise.
  */
-bool Search(const std::string &material, float diameter, float *chipload, float *rpm_factor)
+bool Search(const std::string &material, float diameter, float &chipload, float &rpm_factor)
 {
     unsigned int index = Hash(material);
-    node *cursor = table[index];
+    Node *cursor = table[index];
     while (cursor != NULL)
     {
-        if (strcasecmp(cursor->material, material.c_str()) == 0 && cursor->diameter == diameter)
+        if (strcasecmp(cursor->material.c_str(), material.c_str()) == 0 && cursor->diameter == diameter)
         {
             printf("Found: Material=%s, Diameter=%.2f, Chipload=%.2f, Factor=%.2f\n",
-                   cursor->material, cursor->diameter, cursor->chipload, cursor->factor);
-            *chipload = cursor->chipload;
-            *rpm_factor = cursor->factor;
+                   cursor->material.c_str(), cursor->diameter, cursor->chipload, cursor->factor);
+            chipload = cursor->chipload;
+            rpm_factor = cursor->factor;
             return true;
         }
         cursor = cursor->next;
@@ -158,10 +158,10 @@ bool Unload(void)
 {
     for (int i = 0; i < N_BUCKETS; i++)
     {
-        node* cursor = table[i];
+        Node* cursor = table[i];
         while (cursor)
         {
-            node* tmp = cursor;
+            Node* tmp = cursor;
             cursor = cursor->next;
             free(tmp);
         }
@@ -176,14 +176,14 @@ void PrintTable(void)
 {
     for (unsigned int i = 0; i < N_BUCKETS; i++)
     {
-        node *cursor = table[i];
+        Node *cursor = table[i];
         if (cursor != NULL)
         {
             printf("Bucket %u:\n", i);
             while (cursor != NULL)
             {
                 printf("  Material: %s, Diameter: %.2f, Chipload: %.2f, Factor: %.2f\n",
-                       cursor->material, cursor->diameter, cursor->chipload, cursor->factor);
+                       cursor->material.c_str(), cursor->diameter, cursor->chipload, cursor->factor);
                 cursor = cursor->next;
             }
         }
