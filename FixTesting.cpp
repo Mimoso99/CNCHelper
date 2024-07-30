@@ -135,5 +135,18 @@ int main(void)
     printf("The diameter is %d mm (rounded from %.2f %s)\n", rounded_diameter, diameter, best_tool_unit.c_str());
     printf("\n");
 
+
+    // Find best material match
+    std::string best_material = BestMatch(material, unique_materials, MAX_MATERIAL_DISTANCE);
+    if (best_material == "error") {
+        printf("Invalid material\n");
+        ErrorMessage(file_output.c_str(), 12);
+        return 12;
+    }
+    // for debugging purposes prints the material that best matches the materials supported
+    printf("The best match found in the materials for %s was %s\n", material.c_str(), best_material.c_str());
+    printf("\n");
+
+
     return 0;
 }

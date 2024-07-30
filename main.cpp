@@ -155,12 +155,169 @@ int main(void)
         return 12;
     }
 
-    chipload = GetChipload(best_material);
-    rpm_factor = GetRpmFactor(best_material);
+    /**
+     * Searches for a material match and retrieves the corresponding chipload and RPM factor.
+     * If the Search fails, it logs an error message, prints a notification about the unsupported tool diameter for the valid material,
+     * and returns error code 13.
+     */
+    chipload = 0;
+    rpm_factor = 0;
+    if (!Search(best_material, rounded_diameter, &chipload, &rpm_factor)) {
+        ErrorMessage(file_output, 13);
+        printf("For the valid material the tool diameter isn't supported\n");
+        return 13;
+    }
+    // for debugging purposes prints the chipload and rpm_factor that matches the material
+    printf("The chipload is %f, and the rpm factor is %f\n", chipload, rpm_factor);
+    printf("\n");
 
-    // Output final results
-    printf("Chipload is: %.2f mm/tooth\n", chipload);
-    printf("RPM Factor: %.2f\n", rpm_factor);
+
+    /**
+     * Calculates the feed_rate rates based on the given speed value and specific scenarios.
+     * 
+     * Parameters:
+     * - speed: The speed value determining the scenario for feed_rate rate calculation.
+     * - chipload: The chipload value used in the feed_rate rate calculation.
+     * - tool_z: The number of cutting edges on the tool.
+     * 
+     * Returns:
+     * - Feeds: The calculated feed_rate rates based on the speed scenario.
+     */
+    if (begginer) {
+        speed = 6; // begginer mode
+    }
+    Point Feeds;          // variable of type Point, holds x(rpm) and y value(feedrate)
+    float upper_bound;    // upper bound chipload straight slope
+    float lower_bound;    // lower bound chipload straight slope
+    switch ((int)speed) {
+    case 1: // MAX FINISH
+        // lower chipload
+        upper_bound = 0.5 * (chipload + MAXDEV) * tool_z;
+        lower_bound = 0.5 * (chipload - MAXDEV) * tool_z;
+        // Simplex for speed
+        Feeds = Simplex(CNCMINSPEED, CNCMAXSPEED, CNCMAXFEED, upper_bound, lower_bound, false);
+        break;
+
+    case 2: // FINISH
+        // lower chipload
+        upper_bound = 0.5 * (chipload + MAXDEV) * tool_z;
+        lower_bound = 0.5 * (chipload - MAXDEV) * tool_z;
+        // Simplex for speed
+        Feeds = Simplex(CNCMINSPEED, CNCMAXSPEED, CNCMAXFEED, upper_bound, lower_bound, false);
+        break;
+
+    case 4: // MATERIAL REMOVAL
+        // higher chipload
+        upper_bound = 0.5 * (chipload + MAXDEV) * tool_z;
+        lower_bound = 0.5 * (chipload - MAXDEV) * tool_z;
+        // Simplex for feed_rate
+        Feeds = Simplex(CNCMINSPEED, CNCMAXSPEED, CNCMAXFEED, upper_bound, lower_bound, false);
+        break;
+
+    case 5: // MAX MATERIAL REMOVAL
+        // higher chipload
+        upper_bound = 0.5 * (chipload + MAXDEV) * tool_z;
+        lower_bound = 0.5 * (chipload - MAXDEV) * tool_z;
+        // Simplex for feed_rate
+        Feeds = Simplex(CNCMINSPEED, CNCMAXSPEED, CNCMAXFEED, upper_bound, lower_bound, false);
+        break;
+
+    case 6: // BEGGINER MODE, SIMILAR TO DEFAULT BUT LESS CHIPLOAD (x0.5) AND REDUCED FEEDRATE (x0.625)
+        // use chipload from table
+        chipload = chipload * tool_z;
+        // Midpoint
+        Feeds = Midpoint(CNCMINSPEED, CNCMAXSPEED, CNCMAXFEED, chipload);
+        Feeds.x = 0.9 * Feeds.x;    // lower rpm
+        Feeds.y = 0.5 * Feeds.y;    // lower feedrate significantly
+        break;
+
+    default: // BALANCED TOOL LIFE OPTIMIZATION (case 3 or other)
+        // use chipload from table
+        chipload = chipload * tool_z;
+        // Midpoint
+        Feeds = Midpoint(CNCMINSPEED, CNCMAXSPEED, CNCMAXFEED, chipload);
+        break;
+    }
+
+    // Handles edge case where Point Feeds is out of feasible region
+    if (Feeds.x == 0 || Feeds.y == 0) {
+        WarningMessage(file_output, 15); // Warns user and gives helpful advice
+        printf("Chipload out of feasible region\n");
+    }
+
+
+    /**
+     * Performs unit conversion for the feed_rate rate based on the desired output unit.
+     * 
+     * Parameters:
+     * - out_unit: The desired output unit for the feed_rate rate.
+     * - Feeds.y: The calculated feed_rate rate in mm/m.
+     * 
+     * Returns:
+     * - feed_rate: The converted feed_rate rate based on the desired output unit.
+     */
+    char *best_out_unit = BestMatch(out_unit, speed_units, 8, MAX_UNIT_DISTANCE);
+    if (strcmp(best_out_unit, "error") == 0) {
+        printf("You didn't specify the units you want the results to be displayed, the feedrate was calculated in mm/m.\n");
+        WarningMessage(file_output, 14);
+        return 14;
+    }
+    const float feed_rate = Convert(Feeds.y, "mm/m", best_out_unit);
+    // for debugging purposes prints the feed rate unit that best matches
+    printf("best match for unit %s is %s\n", out_unit, best_out_unit);
+    printf("\n");
+
+
+    /**
+     * Write the calculated feed_rate rate, speed, and other relevant information to a specified .txt file.
+     * 
+     * Parameters:
+     * - file_output: The name of the output file to write the results to.
+     * - best_material: The matched material for the machining job.
+     * - tool_diameter: The diameter of the cutting tool.
+     * - tool_unit: The unit of the cutting tool diameter.
+     * - tool_z: The number of cutting edges on the tool.
+     * - speed: The selected job quality/speed for machining.
+     * - Feeds: The calculated feed_rate rates based on the speed scenario.
+     * - checklist: A flag indicating if a checklist is required.
+     * - supported_materials_list: A flag indicating if the supported materials list is needed.
+     * 
+     * Returns:
+     * - 0 if the results were successfully written to the file; otherwise, returns 15 and prints an error message.
+     */
+    if (!WriteResultsToFile(file_output, best_material, tool_diameter, best_tool_unit, tool_z, speed, Feeds, feed_rate, best_out_unit, unique_materials, checklist, supported_materials_list)) {
+        printf("Couldn't write results to file\n");
+        return 15;
+    }
+    // for debugging purposes prints the feed_rate and Point Feeds to stdout
+    printf("The feed_rate is %.1f %s (from the calculated %i mm/m), and the rpm is %i\n", feed_rate, best_out_unit, Feeds.y, Feeds.x);
+    printf("\n");
+
+
+    /**
+     * Free allocated memory for unique materials array elements, material, tool unit, tool teeth, job quality, output units,
+     * and Unload the Hash table.
+     */
+    for (unsigned int i = 0; i < unique_materials_count; i++)
+    {
+        free(unique_materials[i]); // Free the allocated memory
+    }
+    // Malloced variables
+    free(material);
+    free(tool);
+    free(tool_teeth);
+    free(job_quality);
+    free(out_unit);
+    // Mallocced Hash table
+    Unload();
+
+
+    /**
+     * Return with no errors
+     */
+    printf("Success!\n");
+    return 0;
+}
 
     return 0;
 }
