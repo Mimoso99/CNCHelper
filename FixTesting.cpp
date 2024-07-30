@@ -67,5 +67,22 @@ int main(void)
         return 3;
     }
 
+
+    // Clean and extract numerical values
+    std::string tool_unit = tool;
+    CleanString(material);
+    CleanString(tool_unit);
+    float tool_diameter = CleanNumber(tool);
+    float tool_z = CleanNumber(tool_teeth);
+    float speed = CleanNumber(job_quality);
+    CleanString(out_unit);
+
+    printf("Material to cut: %s\n", material.c_str());
+    printf("Tool Diameter to cut: %.2f %s\n", tool_diameter, tool_unit.c_str());
+    printf("Tool Teeth: %.2f\n", tool_z);
+    printf("Job Quality: %s\n", job_quality.c_str());
+    printf("Units: %s\n", out_unit.c_str());
+    printf("\n");
+
     return 0;
 }

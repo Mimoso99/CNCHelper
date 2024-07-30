@@ -76,34 +76,41 @@ void CleanString(std::string &source) {
  */
 float CleanNumber(const std::string &source) {
     std::string cleanedStr;
-    int index = 0;
     bool has_decimal_point = false;
     bool has_fraction = false;
     int numerator = 0;
     int denominator = 0;
+    size_t fraction_pos = source.find('/');
 
-    for (char c : source) {
-        if (isdigit(static_cast<unsigned char>(c))) {
-            cleanedStr += c;
-            if (has_fraction) {
-                denominator = denominator * 10 + (c - '0');
-            } else {
-                numerator = numerator * 10 + (c - '0');
-            }
-        } else if (c == '.' && !has_decimal_point) {
-            cleanedStr += c;
-            has_decimal_point = true;
-        } else if (c == '/') {
-            has_fraction = true;
-            cleanedStr.clear(); // Clear cleanedStr before processing the denominator
-            numerator = std::stoi(cleanedStr); // Convert the numerator part
+    // If it's a fraction
+    if (fraction_pos != std::string::npos) {
+        try {
+            numerator = std::stoi(source.substr(0, fraction_pos));
+            denominator = std::stoi(source.substr(fraction_pos + 1));
+            if (denominator == 0) throw std::invalid_argument("Denominator cannot be zero.");
+            return static_cast<float>(numerator) / denominator;
+        } catch (const std::exception &e) {
+            std::cerr << "Exception in CleanNumber (fraction): " << e.what() << std::endl;
+            return 0.0;
         }
     }
 
-    if (has_fraction && denominator != 0) {
-        return static_cast<float>(numerator) / denominator;
-    } else {
-        return std::stof(cleanedStr); // Convert the cleaned string to float
+    // If it's a decimal or integer
+    for (char c : source) {
+        if (isdigit(static_cast<unsigned char>(c))) {
+            cleanedStr += c;
+        } else if (c == '.' && !has_decimal_point) {
+            cleanedStr += c;
+            has_decimal_point = true;
+        }
+    }
+
+    try {
+        if (cleanedStr.empty()) throw std::invalid_argument("No digits found in the input string.");
+        return std::stof(cleanedStr);
+    } catch (const std::exception &e) {
+        std::cerr << "Exception in CleanNumber (decimal/integer): " << e.what() << std::endl;
+        return 0.0;
     }
 }
 
