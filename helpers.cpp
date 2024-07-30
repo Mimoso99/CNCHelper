@@ -4,6 +4,7 @@
 #include <cstdlib>      // for memory allocation
 #include <cstring>      // for string manipulation functions
 #include <string>       // for std::string
+#include <vector>       // for std::vector
 #include "chipload.h"   // for external user defined functions
 
 // external variable
