@@ -244,5 +244,46 @@ int main(void)
     printf("\n");
 
 
+    /**
+     * Write the calculated feed_rate rate, speed, and other relevant information to a specified .txt file.
+     * 
+     * Parameters:
+     * - file_output: The name of the output file to write the results to.
+     * - best_material: The matched material for the machining job.
+     * - tool_diameter: The diameter of the cutting tool.
+     * - tool_unit: The unit of the cutting tool diameter.
+     * - tool_z: The number of cutting edges on the tool.
+     * - speed: The selected job quality/speed for machining.
+     * - Feeds: The calculated feed_rate rates based on the speed scenario.
+     * - checklist: A flag indicating if a checklist is required.
+     * - supported_materials_list: A flag indicating if the supported materials list is needed.
+     * 
+     * Returns:
+     * - 0 if the results were successfully written to the file; otherwise, returns 15 and prints an error message.
+     */
+    if (!WriteResultsToFile(file_output, best_material, tool_diameter, best_tool_unit, tool_z, speed, Feeds, feed_rate, best_out_unit, unique_materials, checklist, supported_materials_list)) {
+        printf("Couldn't write results to file\n");
+        return 15;
+    }
+    // for debugging purposes prints the feed_rate and Point Feeds to stdout
+    printf("The feed_rate is %.1f %s (from the calculated %i mm/m), and the rpm is %i\n", feed_rate, best_out_unit.c_str(), Feeds.y, Feeds.x);
+    printf("\n");
+
+
+        /**
+     * Free allocated memory for unique materials array elements, material, tool unit, tool teeth, job quality, output units,
+     * and Unload the Hash table.
+     */
+    // Mallocced Hash table
+    Unload();
+
+
+    /**
+     * Return with no errors
+     */
+    printf("Success!\n");
+    return 0;
+
+
     return 0;
 }

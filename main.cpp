@@ -154,6 +154,10 @@ int main(void)
         ErrorMessage(file_output.c_str(), 12);
         return 12;
     }
+    // for debugging purposes prints the material that best matches the materials supported
+    printf("The best match found in the materials for %s was %s\n", material, best_material);
+    printf("\n");
+
 
     /**
      * Searches for a material match and retrieves the corresponding chipload and RPM factor.
@@ -316,8 +320,5 @@ int main(void)
      * Return with no errors
      */
     printf("Success!\n");
-    return 0;
-}
-
     return 0;
 }
