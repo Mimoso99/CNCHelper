@@ -36,13 +36,13 @@ struct Point {
 };
 
 // Declaration of external variables
-extern std::vector<Node*> table;          // Changed from array to vector
-extern std::vector<std::string> unique_materials;  // Changed from array to vector
+extern Node* table[N_BUCKETS];          // Changed from array to vector
+extern unsigned int unique_materials;  // Changed from array to vector
 extern unsigned int unique_materials_count;
 
 
 // Function Prototypes
-bool UniqueElements(std::vector<std::string>& unique_materials, unsigned int& material_counter);
+bool UniqueElements(std::vector<std::string>& unique_materials, unsigned int* material_counter);
 bool ReadFromFile(const std::string& filename, bool& beginner, std::string& material, std::string& tool_diam, std::string& tool_z, std::string& job_quality, std::string& out_units, bool& checklist, bool& supported_materials_list);
 void CleanString(std::string& source);
 float CleanNumber(const std::string& source);

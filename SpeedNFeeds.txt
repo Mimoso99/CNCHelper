@@ -8,7 +8,7 @@ I'm a begginer: Yes
 Material to cut: softwood
 (Enter the material you want to cut, e.g., Wood, Metal, Plastic)
 
-Tool Diameter: 1/4 inehs
+Tool Diameter: 1/4 inches
 (Enter the dimeter of the tool you will use, e.g., 3mm, 1/4inch)
   
 Tool Flutes: 2

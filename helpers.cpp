@@ -4,10 +4,11 @@
 #include <cstdlib>      // for memory allocation
 #include <cstring>      // for string manipulation functions
 #include <string>       // for std::string
+#include <vector>       // for std::vector
 #include "chipload.h"   // for external user defined functions
 
 // external variable
-extern node *table[N_BUCKETS]; // Ensure this is declared somewhere in your code
+extern Node *table[N_BUCKETS]; // Ensure this is declared somewhere in your code
 
 /**
  * Function: initializes unique materials by checking and adding them to the unique_materials array.
@@ -20,20 +21,23 @@ extern node *table[N_BUCKETS]; // Ensure this is declared somewhere in your code
  * @return true if the initialization is successful, false otherwise.
  */
 bool UniqueElements(std::vector<std::string> &unique_materials, unsigned int *material_counter) {
+    unique_materials.clear(); // Clear the vector to start fresh
+    *material_counter = 0;
+
     for (unsigned int i = 0; i < N_BUCKETS; i++) {
-        node *cursor = table[i];
+        Node *cursor = table[i];
         while (cursor != NULL) {
             bool unique = true;
             // check if the material is already in the unique_materials vector
-            for (unsigned int j = 0; j < *material_counter; j++) {
-                if (strcasecmp(cursor->material, unique_materials[j].c_str()) == 0) {
+            for (unsigned int j = 0; j < unique_materials.size(); j++) {
+                if (strcasecmp(cursor->material.c_str(), unique_materials[j].c_str()) == 0) {
                     unique = false;
                     break;
                 }
             }
             // If the material is unique, add it to the unique_materials vector
             if (unique) {
-                unique_materials[*material_counter] = cursor->material;
+                unique_materials.push_back(cursor->material);
                 (*material_counter)++;
             }
             cursor = cursor->next;
@@ -73,34 +77,41 @@ void CleanString(std::string &source) {
  */
 float CleanNumber(const std::string &source) {
     std::string cleanedStr;
-    int index = 0;
     bool has_decimal_point = false;
     bool has_fraction = false;
     int numerator = 0;
     int denominator = 0;
+    size_t fraction_pos = source.find('/');
 
-    for (char c : source) {
-        if (isdigit(static_cast<unsigned char>(c))) {
-            cleanedStr += c;
-            if (has_fraction) {
-                denominator = denominator * 10 + (c - '0');
-            } else {
-                numerator = numerator * 10 + (c - '0');
-            }
-        } else if (c == '.' && !has_decimal_point) {
-            cleanedStr += c;
-            has_decimal_point = true;
-        } else if (c == '/') {
-            has_fraction = true;
-            cleanedStr.clear(); // Clear cleanedStr before processing the denominator
-            numerator = std::stoi(cleanedStr); // Convert the numerator part
+    // If it's a fraction
+    if (fraction_pos != std::string::npos) {
+        try {
+            numerator = std::stoi(source.substr(0, fraction_pos));
+            denominator = std::stoi(source.substr(fraction_pos + 1));
+            if (denominator == 0) throw std::invalid_argument("Denominator cannot be zero.");
+            return static_cast<float>(numerator) / denominator;
+        } catch (const std::exception &e) {
+            std::cerr << "Exception in CleanNumber (fraction): " << e.what() << std::endl;
+            return 0.0;
         }
     }
 
-    if (has_fraction && denominator != 0) {
-        return static_cast<float>(numerator) / denominator;
-    } else {
-        return std::stof(cleanedStr); // Convert the cleaned string to float
+    // If it's a decimal or integer
+    for (char c : source) {
+        if (isdigit(static_cast<unsigned char>(c))) {
+            cleanedStr += c;
+        } else if (c == '.' && !has_decimal_point) {
+            cleanedStr += c;
+            has_decimal_point = true;
+        }
+    }
+
+    try {
+        if (cleanedStr.empty()) throw std::invalid_argument("No digits found in the input string.");
+        return std::stof(cleanedStr);
+    } catch (const std::exception &e) {
+        std::cerr << "Exception in CleanNumber (decimal/integer): " << e.what() << std::endl;
+        return 0.0;
     }
 }
 
