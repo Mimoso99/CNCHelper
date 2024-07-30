@@ -1,4 +1,6 @@
 /**
+ * This is the First Stable Version o CNCHelper in C++20 v1.0
+ * 
  * This code represents the main function of a CHIPLOAD CALCULATOR program,
  * that abstracts several steps and considerations from the user returning a suitable feedrate and speed for the CNC machining job.
  * It loads materials from a .csv file, reads and interprets user input from a .txt file, calculates various parameters, 
