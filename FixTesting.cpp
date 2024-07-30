@@ -24,7 +24,7 @@ int main(void)
     std::string tool_teeth = "";
     std::string job_quality = "";
     std::string out_unit = "";
-    std::string unique_materials[N_BUCKETS]; // Array of fixed size
+    std::vector<std::string> unique_materials; // Array of fixed size
 
     // Variables for CSV values
     float chipload = 0;
@@ -43,6 +43,20 @@ int main(void)
         return 1;
     }
     PrintTable();
+    printf("\n");
+
+
+    // Initialize unique materials
+    unsigned int unique_materials_count = 0;
+    if (!UniqueElements(unique_materials, &unique_materials_count)) {
+        ErrorMessage(file_output.c_str(), 2);
+        printf("Memory allocation for unique materials has failed\n");
+        return 2;
+    }
+    printf("Loaded the following %u materials:\n", unique_materials_count);
+    for (unsigned int i = 0; i < unique_materials_count; ++i) {
+        printf("%s\n", unique_materials[i].c_str());
+    }
     printf("\n");
 
     return 0;

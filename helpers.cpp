@@ -20,12 +20,15 @@ extern Node *table[N_BUCKETS]; // Ensure this is declared somewhere in your code
  * @return true if the initialization is successful, false otherwise.
  */
 bool UniqueElements(std::vector<std::string> &unique_materials, unsigned int *material_counter) {
+    unique_materials.clear(); // Clear the vector to start fresh
+    *material_counter = 0;
+
     for (unsigned int i = 0; i < N_BUCKETS; i++) {
         Node *cursor = table[i];
         while (cursor != NULL) {
             bool unique = true;
             // check if the material is already in the unique_materials vector
-            for (unsigned int j = 0; j < *material_counter; j++) {
+            for (unsigned int j = 0; j < unique_materials.size(); j++) {
                 if (strcasecmp(cursor->material.c_str(), unique_materials[j].c_str()) == 0) {
                     unique = false;
                     break;
@@ -33,7 +36,7 @@ bool UniqueElements(std::vector<std::string> &unique_materials, unsigned int *ma
             }
             // If the material is unique, add it to the unique_materials vector
             if (unique) {
-                unique_materials[*material_counter] = cursor->material;
+                unique_materials.push_back(cursor->material);
                 (*material_counter)++;
             }
             cursor = cursor->next;
