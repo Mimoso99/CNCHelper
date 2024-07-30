@@ -282,8 +282,6 @@ int main(void)
      * Return with no errors
      */
     printf("Success!\n");
-    return 0;
-
 
     return 0;
 }

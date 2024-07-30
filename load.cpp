@@ -95,11 +95,12 @@ bool Load(const std::string& filename)
         }
 
         // Create a new node for the material
-        Node *n = (Node *)malloc(sizeof(Node));
+        Node *n = new(std::nothrow) Node; // Use new with std::nothrow to avoid exception on failure
         if (!n)
         {
             printf("Failed to allocate memory for a new node (LookupTable chipload data structure)");
             fclose(file);
+            Unload(); // Clean up allocated memory before exiting
             return false;
         }
         n->material = material;
@@ -114,6 +115,7 @@ bool Load(const std::string& filename)
     fclose(file);
     return true;
 }
+
 
 /**
  * Search for a material and diameter in the Hash table.
@@ -163,8 +165,9 @@ bool Unload(void)
         {
             Node* tmp = cursor;
             cursor = cursor->next;
-            free(tmp);
+            delete tmp; // Use delete instead of free
         }
+        table[i] = NULL; // Ensure bucket is set to NULL after deletion
     }
     return true;
 }
