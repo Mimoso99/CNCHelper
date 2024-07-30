@@ -59,5 +59,13 @@ int main(void)
     }
     printf("\n");
 
+
+    // Read user input
+    if (!ReadFromFile(file_input, beginner, material, tool, tool_teeth, job_quality, out_unit, checklist, supported_materials_list)) {
+        ErrorMessage(file_output.c_str(), 3);
+        printf("Failed to read from file.\n");
+        return 3;
+    }
+
     return 0;
 }
