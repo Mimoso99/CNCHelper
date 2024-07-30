@@ -148,5 +148,101 @@ int main(void)
     printf("\n");
 
 
+    /**
+     * Calculates the feed_rate rates based on the given speed value and specific scenarios.
+     * 
+     * Parameters:
+     * - speed: The speed value determining the scenario for feed_rate rate calculation.
+     * - chipload: The chipload value used in the feed_rate rate calculation.
+     * - tool_z: The number of cutting edges on the tool.
+     * 
+     * Returns:
+     * - Feeds: The calculated feed_rate rates based on the speed scenario.
+     */
+    if (beginner) {
+        speed = 6; // begginer mode
+    }
+    Point Feeds;          // variable of type Point, holds x(rpm) and y value(feedrate)
+    float upper_bound;    // upper bound chipload straight slope
+    float lower_bound;    // lower bound chipload straight slope
+    switch ((int)speed) {
+    case 1: // MAX FINISH
+        // lower chipload
+        upper_bound = 0.5 * (chipload + MAXDEV) * tool_z;
+        lower_bound = 0.5 * (chipload - MAXDEV) * tool_z;
+        // Simplex for speed
+        Feeds = Simplex(CNCMINSPEED, CNCMAXSPEED, CNCMAXFEED, upper_bound, lower_bound, false);
+        break;
+
+    case 2: // FINISH
+        // lower chipload
+        upper_bound = 0.5 * (chipload + MAXDEV) * tool_z;
+        lower_bound = 0.5 * (chipload - MAXDEV) * tool_z;
+        // Simplex for speed
+        Feeds = Simplex(CNCMINSPEED, CNCMAXSPEED, CNCMAXFEED, upper_bound, lower_bound, false);
+        break;
+
+    case 4: // MATERIAL REMOVAL
+        // higher chipload
+        upper_bound = 0.5 * (chipload + MAXDEV) * tool_z;
+        lower_bound = 0.5 * (chipload - MAXDEV) * tool_z;
+        // Simplex for feed_rate
+        Feeds = Simplex(CNCMINSPEED, CNCMAXSPEED, CNCMAXFEED, upper_bound, lower_bound, false);
+        break;
+
+    case 5: // MAX MATERIAL REMOVAL
+        // higher chipload
+        upper_bound = 0.5 * (chipload + MAXDEV) * tool_z;
+        lower_bound = 0.5 * (chipload - MAXDEV) * tool_z;
+        // Simplex for feed_rate
+        Feeds = Simplex(CNCMINSPEED, CNCMAXSPEED, CNCMAXFEED, upper_bound, lower_bound, false);
+        break;
+
+    case 6: // BEGGINER MODE, SIMILAR TO DEFAULT BUT LESS CHIPLOAD (x0.5) AND REDUCED FEEDRATE (x0.625)
+        // use chipload from table
+        chipload = chipload * tool_z;
+        // Midpoint
+        Feeds = Midpoint(CNCMINSPEED, CNCMAXSPEED, CNCMAXFEED, chipload);
+        Feeds.x = 0.9 * Feeds.x;    // lower rpm
+        Feeds.y = 0.5 * Feeds.y;    // lower feedrate significantly
+        break;
+
+    default: // BALANCED TOOL LIFE OPTIMIZATION (case 3 or other)
+        // use chipload from table
+        chipload = chipload * tool_z;
+        // Midpoint
+        Feeds = Midpoint(CNCMINSPEED, CNCMAXSPEED, CNCMAXFEED, chipload);
+        break;
+    }
+
+    // Handles edge case where Point Feeds is out of feasible region
+    if (Feeds.x == 0 || Feeds.y == 0) {
+        WarningMessage(file_output, 15); // Warns user and gives helpful advice
+        printf("Chipload out of feasible region\n");
+    }
+
+
+    /**
+     * Performs unit conversion for the feed_rate rate based on the desired output unit.
+     * 
+     * Parameters:
+     * - out_unit: The desired output unit for the feed_rate rate.
+     * - Feeds.y: The calculated feed_rate rate in mm/m.
+     * 
+     * Returns:
+     * - feed_rate: The converted feed_rate rate based on the desired output unit.
+     */
+    std::string best_out_unit = BestMatch(out_unit, speed_units, MAX_UNIT_DISTANCE);
+    if (strcmp(best_out_unit.c_str(), "error") == 0) {
+        printf("You didn't specify the units you want the results to be displayed, the feedrate was calculated in mm/m.\n");
+        WarningMessage(file_output, 14);
+        return 14;
+    }
+    const float feed_rate = Convert(Feeds.y, "mm/m", best_out_unit);
+    // for debugging purposes prints the feed rate unit that best matches
+    printf("best match for unit %s is %s\n", out_unit.c_str(), best_out_unit.c_str());
+    printf("\n");
+
+
     return 0;
 }
